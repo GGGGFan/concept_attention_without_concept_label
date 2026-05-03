@@ -1,0 +1,50 @@
+# Notebook-faithful SapBERT experiment configuration.
+# Replace all paths with your local/HPC paths before running.
+
+paths:
+  train_csv: /path/to/mimic_processed_notes/MP_IN_train.csv
+  eval_csv: /path/to/mimic_processed_notes/MP_IN_test.csv
+  concept_csv: /path/to/df_icd10.csv
+  output_dir: outputs/mimic_sapbert
+
+data:
+  text_col: text
+  label_col: hospital_expire_flag
+
+concepts:
+  code_col: code
+  name_col: name
+  group_col: idx_section
+  group_offset: 1
+  use_from_n3c_if_available: true
+  template: "{name} (Ancestral category: {ancestral_category}, {chapter})"
+
+model:
+  model_name: cambridgeltl/SapBERT-from-PubMedBERT-fulltext
+  batch_size: 4
+  max_length: 512
+  num_workers: 2
+  concept_batch_size: 4
+  concept_max_length: 256
+  concept_pooling: cls
+  dv: 256
+  freeze_text_encoder: false
+  freeze_concepts: true
+  attention_activation: sparsemax
+  top_k: 4
+  temperature: 0.07
+  gate_margin: 0.85
+  gate_tau: 0.05
+  null_bias_init: 2.0
+
+training:
+  seed: 42
+  deterministic: true
+  warmup_epochs: 9
+  concept_epochs: 1
+  blackbox_lr: 0.000001
+  concept_lr: 0.0000005
+  lambda_null_target: 0.02
+  null_target: 0.95
+  lambda_entropy: 0.02
+  lambda_group_lasso: 0.001
